@@ -5,13 +5,34 @@ import Cocoa
 #endif
 
 public struct MieQR {
-    public var image: CIImage?
+    private var url: String?
+    #if os(iOS)
+    private var tint: UIColor?
+    #else
+    private var tint: NSColor?
+    #endif
+    private var logo: CIImage?
     
-    public init() {  }
-    
-    public init?(url: String) {
-        guard let image = self.set(url: url) else { return nil }
-        self.image = image
+    public var image: CIImage? {
+        guard let url = url, let url = URL(string: url) else { return nil }
+        guard let qrFilter = CIFilter(name: "CIQRCodeGenerator") else { return nil }
+        let qrData = url.absoluteString.data(using: String.Encoding.ascii)
+        qrFilter.setValue(qrData, forKey: "inputMessage")
+        
+        let qrTransform = CGAffineTransform(scaleX: 12, y: 12)
+        var image = qrFilter.outputImage?.transformed(by: qrTransform)
+        
+        if let tint = tint {
+            print(tint)
+            image = image?.tinted(using: tint)
+        }
+        
+        if let logo = logo {
+            print(logo)
+            image = image?.addLogo(with: logo)
+        }
+        
+        return image
     }
     
     public func set(url: String) -> CIImage? {
@@ -26,53 +47,20 @@ public struct MieQR {
     
     #if os(iOS)
     public init?(url: String, tintColor: UIColor? = nil, logo: UIImage? = nil) {
-        self.image = set(url: url)
-        
-        if let tintColor = tintColor {
-            self.image = self.tinted(using: tintColor)
-        }
-        
-        if let logo = logo {
-            self.image = self.adding(logo: logo)
-        }
-    }
-    
-    mutating public func tinted(using color: UIColor) -> CIImage? {
-        self.image = self.image?.tinted(using: color)
-        return self.image
-    }
-    
-    mutating public func adding(logo: UIImage?) -> CIImage? {
-        guard let ciImage = logo?.ciImage else { return self.image }
-        self.image = self.image?.addLogo(with: ciImage)
-        return self.image
+        self.url = url
+        self.tint = tintColor
+        self.logo = logo?.ciImage
     }
     #endif
     
     #if os(macOS)
     public init?(url: String, tintColor: NSColor? = nil, logo: NSImage? = nil) {
-        self.image = set(url: url)
+        self.url = url
+        self.tint = tintColor
         
-        if let logo = logo {
-            self.image = self.adding(logo: logo)
+        if let data = logo?.tiffRepresentation, let bitmap = NSBitmapImageRep(data: data) {
+            self.logo = CIImage(bitmapImageRep: bitmap)
         }
-        
-        if let tintColor = tintColor {
-            self.image = self.tinted(using: tintColor)
-        }
-    }
-    
-    mutating public func tinted(using color: NSColor) -> CIImage? {
-        self.image = self.image?.tinted(using: color)
-        return self.image
-    }
-    
-    mutating public func adding(logo: NSImage?) -> CIImage? {
-        guard let data = logo?.tiffRepresentation else { return self.image }
-        guard let bitmap = NSBitmapImageRep(data: data) else { return self.image }
-        guard let ciImage = CIImage(bitmapImageRep: bitmap) else { return self.image }
-        self.image = self.image?.addLogo(with: ciImage)
-        return self.image
     }
     #endif
 }

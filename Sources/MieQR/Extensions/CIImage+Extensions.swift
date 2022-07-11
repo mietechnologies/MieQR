@@ -45,7 +45,7 @@ extension CIImage {
         let colorImage = colorFilter.outputImage
         filter.setValue(colorImage, forKey: kCIInputImageKey)
         filter.setValue(transparentQRImage, forKey: kCIInputBackgroundImageKey)
-        return filter.outputImage!
+        return filter.outputImage
     }
 }
 #endif
@@ -62,7 +62,7 @@ extension CIImage {
         let colorImage = colorFilter.outputImage
         filter.setValue(colorImage, forKey: kCIInputImageKey)
         filter.setValue(transparentQRImage, forKey: kCIInputBackgroundImageKey)
-        return filter.outputImage!
+        return filter.outputImage
     }
 }
 #endif
