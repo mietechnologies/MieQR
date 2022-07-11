@@ -29,7 +29,7 @@ extension CIImage {
         let centerTransform = CGAffineTransform(translationX: extent.midX - (image.extent.size.width / 2), y: extent.midY - (image.extent.size.height / 2))
         combinedFilter.setValue(image.transformed(by: centerTransform), forKey: "inputImage")
         combinedFilter.setValue(self, forKey: "inputBackgroundImage")
-        return combinedFilter.outputImage!
+        return combinedFilter.outputImage
     }
 }
 

@@ -53,12 +53,12 @@ public struct MieQR {
     public init?(url: String, tintColor: NSColor? = nil, logo: NSImage? = nil) {
         self.image = set(url: url)
         
-        if let tintColor = tintColor {
-            self.image = self.tinted(using: tintColor)
-        }
-        
         if let logo = logo {
             self.image = self.adding(logo: logo)
+        }
+        
+        if let tintColor = tintColor {
+            self.image = self.tinted(using: tintColor)
         }
     }
     

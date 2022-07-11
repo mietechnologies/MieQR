@@ -21,12 +21,16 @@ let package = Package(
         .target(
             name: "MieQR",
             dependencies: [],
-            resources: [.process("Resources")]
+            resources: [
+                .process("Resources"),
+            ]
         ),
         .testTarget(
             name: "MieQRTests",
             dependencies: ["MieQR"],
-            resources: [.copy("Resources")]
+            resources: [
+                .copy("Resources")
+            ]
         ),
     ]
 )

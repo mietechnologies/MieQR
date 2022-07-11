@@ -22,18 +22,25 @@ extension Bundle {
 final class MieQRTests: XCTestCase {
     let url: String = "https://mietechnologies.com"
     
+    var generatedDirectory: URL? {
+        // Get save directory
+        guard let destination = URL(string: "file://\(#file)")?
+            .deletingLastPathComponent()
+            .appendingPathComponent("Generated") else { return nil }
+        try? FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
+        return destination
+    }
+    
     func save(qr: CIImage?, filename: String = "qr") {
         guard let qr = qr else { return }
-        let bundle = Bundle(for: type(of: self))
-        var destinationURL = bundle.bundleURL.appendingPathComponent("generated")
-        try? FileManager.default.createDirectory(at: destinationURL, withIntermediateDirectories: true)
-        destinationURL = destinationURL.appendingPathComponent("\(filename).jpeg")
+        guard let generated = generatedDirectory else { return XCTFail("") }
+        let destination = generated.appendingPathComponent("\(filename).jpeg")
         
         if let colorSpace = CGColorSpace(name: CGColorSpace.sRGB) {
             do {
                 let context = CIContext()
-                try context.writeJPEGRepresentation(of: qr, to: destinationURL, colorSpace: colorSpace, options: [kCGImageDestinationLossyCompressionQuality as CIImageRepresentationOption : 1.0])
-                print(destinationURL.path)
+                try context.writeJPEGRepresentation(of: qr, to: destination, colorSpace: colorSpace, options: [kCGImageDestinationLossyCompressionQuality as CIImageRepresentationOption : 1.0])
+                print("QR code saved to \(destination.absoluteString)")
             } catch {
                 print(error.localizedDescription)
             }
@@ -55,34 +62,25 @@ extension MieQRTests {
 #if os(macOS)
 extension MieQRTests {
     func testGenerationWithUrl() {
-        let qr = MieQR(url: url)
-        guard let image = qr?.image else { return XCTFail("QR Code was not successfully generated!") }
-        save(qr: image)
+        guard let qr = MieQR(url: url)?.image else { return XCTFail("QR Code was not successfully generated!") }
+        save(qr: qr)
     }
     
     func testGenerationWithUrlAndTint() {
-        let qr = MieQR(url: url, tintColor: .brown)
-        guard let image = qr?.image else { return XCTFail("QR Code was not successfully generated!") }
-        save(qr: image, filename: "qr-with-color")
+        guard let qr = MieQR(url: url, tintColor: .brown)?.image else { return XCTFail("QR Code was not successfully generated!") }
+        save(qr: qr, filename: "qr-with-color")
     }
     
     func testGenerationWithUrlAndLogo() {
-        var qr = MieQR(url: url)
-        
-        // Add image
-        let bundle = Bundle(for: type(of: self))
-        guard let path = bundle.url(forResource: "logo", withExtension: "png") else { return XCTFail("Could not construct path to logo image!") }
-        guard let image = qr?.adding(logo: NSImage(contentsOf: path)) else { return XCTFail("QR Code was not successfully generated!") }
-        
-        save(qr: image, filename: "qr-with-logo")
+        guard let path = Bundle.module.url(forResource: "logo", withExtension: "png") else { return XCTFail("Could not construct path to logo image!") }
+        guard let qr = MieQR(url: url, logo: NSImage(contentsOf: path))?.image else { return XCTFail("QR Code was not successfully generated!") }
+        save(qr: qr, filename: "qr-with-logo")
     }
     
     func testCompleteGeneration() {
-        let bundle = Bundle(for: type(of: self))
-        guard let path = bundle.url(forResource: "logo_with_bg", withExtension: "png") else { return }
-        let qr = MieQR(url: url, logo: NSImage(contentsOf: path))
-        guard let image = qr?.image else { return XCTFail("QR Code was not successfully generated!") }
-        save(qr: image, filename: "qr-with-all-options")
+        guard let path = Bundle.module.url(forResource: "logo", withExtension: "png") else { return XCTFail("Could not construct path to logo image!") }
+        guard let qr = MieQR(url: url, tintColor: .brown, logo: NSImage(contentsOf: path))?.image else { return XCTFail("QR Code was not successfully generated!") }
+        save(qr: qr, filename: "qr-with-all-options")
     }
 }
 #endif
