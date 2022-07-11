@@ -24,18 +24,12 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "MieQR",
-            dependencies: [],
-            resources: [
-                .process("Resources"),
-            ]
+            dependencies: []
         ),
         .testTarget(
             name: "MieQRTests",
             dependencies: ["MieQR"],
-            exclude: ["Generated"],
-            resources: [
-//                .process("Resources")
-            ]
+            exclude: ["Generated"]
         ),
     ]
 )
