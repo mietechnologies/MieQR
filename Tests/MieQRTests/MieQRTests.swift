@@ -1,11 +1,17 @@
 import XCTest
 @testable import MieQR
 
+#if os(iOS)
 final class MieQRTests: XCTestCase {
     func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
-        XCTAssertEqual(MieQR().text, "Hello, World!")
+        let qr = MieQR(url: "https://mietechnologies.com")
+        
     }
 }
+#endif
+
+#if os(macOS)
+final class MieQRTests: XCTestCase {
+    
+}
+#endif
